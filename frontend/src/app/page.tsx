@@ -1,7 +1,8 @@
 "use client";
-import movies from "../app/movies.json";
+
 import {
   Button,
+  ButtonGroup,
   Divider,
   Link,
   Modal,
@@ -15,57 +16,29 @@ import {
 } from "@nextui-org/react";
 import { Bebas_Neue } from "next/font/google";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { IoIosStar } from "react-icons/io";
+import { movies } from "./movies";
 
 const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"] });
 
 export default function Home() {
+  const router = useRouter();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [currentMovie, setCurrentMovie] = useState(movies[0]);
   return (
     <main className="flex h-full flex-col items-center text-2xl overflow-hidden ">
       <div className="overflow-hidden text-ellipsis">
-        <Modal
-          isOpen={isOpen}
-          onOpenChange={onOpenChange}
-          placement="center"
-          className="dark"
-        >
-          <ModalContent>
-            {(onClose) => (
-              <>
-                <ModalHeader className="flex flex-col gap-1"></ModalHeader>
-                <ModalBody className="flex items-center">
-                  <h1>{currentMovie.title}</h1>
-                  <Image
-                    src={
-                      "https://image.tmdb.org/t/p/w500/" +
-                      currentMovie.poster_path
-                    }
-                    alt={currentMovie.title ?? "No title"}
-                    width={200}
-                    height={300}
-                  />
+        <div className="flex items-center flex-col w-full justify-center p-8  gap-2">
+          <div className="flex items-center justify-center  gap-5">
+            <IoIosStar size={40} className="pb-1 " />
+            <h1 className={`${bebas.className} text-6xl `}>CARTELERA</h1>
+            <IoIosStar size={40} className="pb-1" />
+          </div>
+          <Divider className=" h-1 w-[90%]" />
+        </div>
 
-                  <p>{currentMovie.overview}</p>
-                </ModalBody>
-                <ModalFooter>
-                  <Button
-                    color="success"
-                    as={Link}
-                    href={"https://letterboxd.com/tmdb/" + currentMovie.id}
-                    onPress={onClose}
-                  >
-                    Letterboxd
-                  </Button>
-                  <Button color="danger" variant="light" onPress={onClose}>
-                    Close
-                  </Button>
-                </ModalFooter>
-              </>
-            )}
-          </ModalContent>
-        </Modal>
         <ScrollShadow className="max-h-[70vh] ">
           {movies.map((movie) => (
             <div
@@ -77,7 +50,8 @@ export default function Home() {
                 className=" text-2xl "
                 onPress={() => {
                   setCurrentMovie(movie);
-                  onOpen();
+
+                  router.push("/" + movie.id);
                 }}
               >
                 <h2
@@ -95,6 +69,13 @@ export default function Home() {
             </div>
           ))}
         </ScrollShadow>
+        <div className="flex items-center w-full justify-center p-10">
+          <ButtonGroup className="text-xl">
+            <Button className={`${bebas.className} text-2xl `}>Random</Button>
+            <Button className={`${bebas.className} text-2xl `}>Lista</Button>
+            <Button className={`${bebas.className} text-2xl `}>Vistas</Button>
+          </ButtonGroup>
+        </div>
       </div>
     </main>
   );

@@ -5,6 +5,7 @@ import "./globals.css";
 import { Button, ButtonGroup, Divider } from "@nextui-org/react";
 import { Providers } from "./root_layout";
 import { IoIosStar } from "react-icons/io";
+import Head from "next/head";
 
 const inter = Inter({ subsets: ["latin"] });
 const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"] });
@@ -24,35 +25,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="fixed h-full overflow-hidden">
-      <body className="overscroll-none w-[100vw] ">
-        <Providers>
-          <main className="min-h-screen flex justify-between flex-col dark text-xl  ">
-            <div className="flex items-center flex-col w-full justify-center p-8  gap-2">
-              <div className="flex items-center justify-center  gap-5">
-                <IoIosStar size={40} className="pb-1 " />
-                <h1 className={`${bebas.className} text-6xl `}>CARTELERA</h1>
-                <IoIosStar size={40} className="pb-1" />
-              </div>
-              <Divider className=" h-1 w-[90%]" />
-            </div>
-            {children}
-            <div className="flex items-center w-full justify-center p-10">
-              <ButtonGroup className="text-xl">
-                <Button className={`${bebas.className} text-2xl `}>
-                  Random
-                </Button>
-                <Button className={`${bebas.className} text-2xl `}>
-                  Lista
-                </Button>
-                <Button className={`${bebas.className} text-2xl `}>
-                  Vistas
-                </Button>
-              </ButtonGroup>
-            </div>
-          </main>
-        </Providers>
-      </body>
-    </html>
+    <>
+      <Head>
+        <title>1000 Películas</title>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="black-translucent"
+        />
+      </Head>
+      <html lang="en" className="fixed h-full overflow-hidden">
+        <body className="overscroll-none w-[100vw] ">
+          <Providers>
+            <main className="min-h-screen flex justify-between flex-col dark text-xl  ">
+              {children}
+            </main>
+          </Providers>
+        </body>
+      </html>
+    </>
   );
 }
