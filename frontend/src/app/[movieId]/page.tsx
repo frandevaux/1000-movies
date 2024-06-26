@@ -1,16 +1,21 @@
 "use client";
-import { Button, Image, ScrollShadow } from "@nextui-org/react";
+import {
+  Button,
+  CircularProgress,
+  Image,
+  ScrollShadow,
+} from "@nextui-org/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { fetchMovieData } from "../tmdbApi";
 import { MovieData } from "../interfaces/movieDataInterface";
-import { Bebas_Neue } from "next/font/google";
-const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"] });
+import { bebas, pt_sans } from "../fonts";
 
 const MoviePage = ({ params }: { params: { movieId: string } }) => {
   const { movieId } = params;
   const [isLoading, setIsLoading] = useState(true);
   const [movieData, setMovieData] = useState<MovieData>({} as MovieData);
+  const [releaseYear, setReleaseYear] = useState(0);
   // Aquí puedes hacer una llamada a la API o acceder a los datos de la película utilizando el movieId
   useEffect(() => {
     const fetchMovieData = async () => {
@@ -18,7 +23,8 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
         .then((res) => res.json())
         .then((data) => {
           setMovieData(data);
-          console.log(data);
+          const releaseYear = new Date(data.release_date).getFullYear();
+          setReleaseYear(releaseYear);
           setIsLoading(false);
         });
     };
@@ -28,7 +34,9 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
   return (
     <main className=" flex h-screen flex-col items-center text-2xl overflow-hidden bg-cover">
       {isLoading ? (
-        <p>Cargando...</p>
+        <div className="flex flex-col h-screen justify-center items-center ">
+          <CircularProgress size="lg" color="default" />
+        </div>
       ) : (
         <div className="flex flex-col justify-center items-center ">
           <div
@@ -51,31 +59,45 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                 {movieData.title}
               </h1>
               {movieData.title != movieData.original_title && (
-                <h2 className={`text-xl `}>{movieData.original_title}</h2>
+                <h2 className={`${pt_sans.className} text-sm `}>
+                  {movieData.original_title}
+                </h2>
               )}
 
-              <h3>{movieData.release_date}</h3>
+              <h2 className={`${pt_sans.className} text-sm `}>
+                {"Dirigida por Quentin Tarantino • " + releaseYear}
+              </h2>
             </div>
 
             <div className="flex flex-col gap-6 ">
               <div className="flex  justify-between ">
                 <Button
-                  color="success"
+                  variant="flat"
+                  radius="full"
+                  className="w-2/5 bg-neutral-700   bg-opacity-25"
                   as={Link}
                   href={"https://letterboxd.com/tmdb/" + movieData.id}
                 >
                   Letterboxd
                 </Button>
                 <Button
-                  color="success"
+                  variant="flat"
+                  radius="full"
+                  className={
+                    movieData.seen
+                      ? "w-2/5 bg-white  bg-opacity-25"
+                      : "w-2/5 bg-neutral-700   bg-opacity-25"
+                  }
                   as={Link}
                   href={"https://letterboxd.com/tmdb/" + movieData.id}
                 >
-                  No vista
+                  {movieData.seen ? "Vista" : "Marcar como vista"}
                 </Button>
               </div>
-              <ScrollShadow className="max-h-[19vh] ">
-                <p>{movieData.overview}</p>
+              <ScrollShadow className="max-h-[25vh] ">
+                <p className={`${pt_sans.className} text-lg `}>
+                  {movieData.overview}
+                </p>
               </ScrollShadow>
             </div>
           </div>

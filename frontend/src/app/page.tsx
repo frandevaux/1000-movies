@@ -14,14 +14,12 @@ import {
   Spacer,
   useDisclosure,
 } from "@nextui-org/react";
-import { Bebas_Neue } from "next/font/google";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { IoIosStar } from "react-icons/io";
 import { movies } from "./movies";
-
-const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"] });
+import { bebas } from "./fonts";
 
 export default function Home() {
   const router = useRouter();

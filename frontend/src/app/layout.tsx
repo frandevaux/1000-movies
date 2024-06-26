@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { Bebas_Neue } from "next/font/google";
 import "./globals.css";
 import { Button, ButtonGroup, Divider } from "@nextui-org/react";
 import { Providers } from "./root_layout";
 import { IoIosStar } from "react-icons/io";
 import Head from "next/head";
-
-const inter = Inter({ subsets: ["latin"] });
-const bebas = Bebas_Neue({ weight: "400", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "1000 Películas",
