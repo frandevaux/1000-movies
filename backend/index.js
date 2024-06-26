@@ -1,71 +1,60 @@
-const fs = require("fs");
 const dotenv = require("dotenv");
 dotenv.config();
 
-// Función para leer el archivo y devolver un array de nombres de películas
-function readMovieListFile(filePath) {
-  return fs.readFileSync(filePath, "utf8").split("\n").filter(Boolean);
-}
-
-// Función para realizar la solicitud a la API y obtener los datos necesarios
-async function fetchMovieData(movieName) {
-  const formattedName = encodeURIComponent(movieName);
-  const url = `https://api.themoviedb.org/3/search/movie?query=${formattedName}&include_adult=false&language=es-US&page=1`;
+async function fetchMovieDataById(movieId) {
+  const urlDetails = `https://api.themoviedb.org/3/movie/${movieId}?language=es-US`;
+  const urlCast = `https://api.themoviedb.org/3/movie/${movieId}/credits?language=es-US`;
+  const apiKey = "Bearer " + process.env.TMDB_API_KEY;
   const options = {
     method: "GET",
     headers: {
       accept: "application/json",
-      Authorization: "Bearer" + process.env.TMDB_API_KEY,
+      Authorization: apiKey,
     },
   };
 
   try {
-    const response = await fetch(url, options);
+    const response = await fetch(urlDetails, options);
     const data = await response.json();
-    if (data.results.length > 0) {
-      const {
-        genre_ids,
-        id,
-        original_language,
-        original_title,
-        overview,
-        poster_path,
-        title,
-        release_date,
-      } = data.results[0];
-      console.log({
-        genre_ids,
-        id,
-        original_language,
-        original_title,
-        overview,
-        poster_path,
-        title,
-        release_date,
-      });
-      return {
-        genre_ids,
-        id,
-        original_language,
-        original_title,
-        overview,
-        poster_path,
-        title,
-        release_date,
-      };
-    }
+    const {
+      genres,
+      id,
+      original_language,
+      original_title,
+      overview,
+      poster_path,
+      title,
+      release_date,
+    } = data;
+    const responseCast = await fetch(urlCast, options);
+    const dataCast = await responseCast.json();
+    const movieData = {
+      genres,
+      id,
+      original_language,
+      original_title,
+      overview,
+      poster_path,
+      title,
+      release_date,
+      cast: dataCast.cast.slice(0, 10),
+      director: dataCast.crew.find((person) => person.job === "Director"),
+    };
+    return movieData;
   } catch (error) {
     console.error(error);
   }
 }
 
-// Función principal para procesar la lista de películas y guardar los resultados en un archivo JSON
+const fs = require("fs").promises;
 async function processMovies(filePath) {
   const movies = readMovieListFile(filePath);
   const results = [];
 
   for (const [index, movieName] of movies.entries()) {
-    const movieData = await fetchMovieData(movieName);
+    const movieData = await fetchMovieData(movieName).then((data) => {
+      console.log(data);
+    });
     if (movieData) {
       movieData.list_id = index + 1;
       movieData.seen = false;
@@ -77,5 +66,33 @@ async function processMovies(filePath) {
   console.log("Archivo movies.json generado con éxito.");
 }
 
+async function processMoviesById(filePath) {
+  try {
+    const fileContent = await fs.readFile(filePath, "utf8");
+    const movies = JSON.parse(fileContent);
+
+    const results = [];
+
+    for (const movie of movies) {
+      const movieData = await fetchMovieDataById(movie.id);
+      if (movieData) {
+        movieData.seen = movie.seen;
+        movieData.list_id = movie.list_id;
+        results.push(movieData);
+      }
+      console.log(movieData);
+    }
+
+    await fs.writeFile(
+      "moviesDetails.json",
+      JSON.stringify(results, null, 2),
+      "utf8"
+    );
+    console.log("Archivo moviesDetails.json generado con éxito.");
+  } catch (error) {
+    console.error("Error al procesar las películas:", error);
+  }
+}
+
 // Reemplazar 'movie-list.txt' con la ruta correcta al archivo de lista de películas
-processMovies("../movie-list.txt");
+processMoviesById("./movies.json");
