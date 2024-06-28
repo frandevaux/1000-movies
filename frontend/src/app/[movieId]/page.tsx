@@ -17,6 +17,7 @@ import { FaCheck } from "react-icons/fa";
 import { TiArrowShuffle } from "react-icons/ti";
 import { getRandomMovieId } from "../shuffle";
 import { useRouter } from "next/navigation";
+import { updateMovieData } from "../utils/movieDataUtils";
 
 const MoviePage = ({ params }: { params: { movieId: string } }) => {
   const router = useRouter();
@@ -24,20 +25,30 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [movieData, setMovieData] = useState<Movie>({} as Movie);
   const [releaseYear, setReleaseYear] = useState(0);
+  const [seen, setSeen] = useState(false);
   // Aquí puedes hacer una llamada a la API o acceder a los datos de la película utilizando el movieId
   useEffect(() => {
     const fetchMovieData = async () => {
       await fetch("/api/movie/" + movieId)
         .then((res) => res.json())
         .then((data) => {
-          setMovieData(data);
-          const releaseYear = new Date(data.release_date).getFullYear();
+          setMovieData(data[0]);
+          const releaseYear = new Date(data[0].release_date).getFullYear();
           setReleaseYear(releaseYear);
+          setSeen(data[0].seen);
           setIsLoading(false);
         });
     };
     fetchMovieData();
   }, [movieId]);
+
+  const handleSeen = () => {
+    // Aquí puedes actualizar el estado de la película a "vista"
+    const newSeen = !seen;
+    const modifiedData = { ...movieData, seen: newSeen };
+    updateMovieData(movieData.id, modifiedData);
+    setSeen(newSeen);
+  };
 
   return (
     <main className=" flex h-screen flex-col items-center text-2xl overflow-hidden bg-cover w-screen ">
@@ -87,7 +98,7 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                     <Button
                       variant="flat"
                       radius="full"
-                      className="w-2/5 bg-neutral-900   bg-opacity-25"
+                      className="w-[45%] bg-neutral-900   bg-opacity-25"
                       as={Link}
                       href={"https://letterboxd.com/tmdb/" + movieData.id}
                     >
@@ -97,14 +108,13 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                       variant="flat"
                       radius="full"
                       className={
-                        movieData.seen
-                          ? "w-2/5 bg-white  bg-opacity-25"
-                          : "w-2/5 bg-neutral-900   bg-opacity-25"
+                        seen
+                          ? "w-[45%] bg-white  bg-opacity-25"
+                          : "w-[45%] bg-neutral-900   bg-opacity-25"
                       }
-                      as={Link}
-                      href={"https://letterboxd.com/tmdb/" + movieData.id}
+                      onPress={handleSeen}
                     >
-                      {movieData.seen ? "Vista" : "Marcar como vista"}
+                      {seen ? "Vista" : "Marcar como vista"}
                     </Button>
                   </div>
                   <div>
@@ -192,7 +202,7 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                 className={`${bebas.className} text-3xl w-[20vw] h-[6vh] bg-transparent  `}
                 isIconOnly
                 onPress={() => {
-                  router.push("/");
+                  router.push("/", { scroll: false });
                 }}
               >
                 <BiSolidMoviePlay />

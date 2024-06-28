@@ -3,6 +3,7 @@
 import {
   Button,
   ButtonGroup,
+  CircularProgress,
   Divider,
   Link,
   Modal,
@@ -16,7 +17,7 @@ import {
 } from "@nextui-org/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { IoIosStar } from "react-icons/io";
 import { movies } from "./movies";
 import { bebas } from "./fonts";
@@ -24,8 +25,40 @@ import { TiArrowShuffle } from "react-icons/ti";
 import { FaCheck } from "react-icons/fa";
 import { BiSolidMoviePlay } from "react-icons/bi";
 import { getRandomMovieId } from "./shuffle";
+import { Movie } from "./interfaces/movieDataInterfaces";
 export default function Home() {
   const router = useRouter();
+  const listRef = useRef<HTMLDivElement>(null);
+  const [movieList, setMovieList] = useState<Movie[]>([] as Movie[]);
+  const fetchMovieData = async () => {
+    try {
+      const res = await fetch("/api/movies");
+      const data = await res.json();
+
+      setMovieList(data);
+    } catch (error) {
+      console.error("Error fetching movie data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovieData();
+    const savedScrollPosition = localStorage.getItem("scrollPosition");
+    console.log(savedScrollPosition);
+    if (savedScrollPosition && listRef.current) {
+      listRef.current.scrollTop = parseInt(savedScrollPosition, 10);
+    }
+  }, []);
+
+  const handleScroll = () => {
+    console.log(listRef.current?.scrollTop);
+    if (listRef.current) {
+      localStorage.setItem(
+        "scrollPosition",
+        listRef.current.scrollTop.toString()
+      );
+    }
+  };
 
   return (
     <main className="flex h-screen w-screen  flex-col items-center text-2xl overflow-hidden ">
@@ -38,35 +71,43 @@ export default function Home() {
           </div>
           <Divider className=" h-1 w-[90%]" />
         </div>
-
-        <ScrollShadow className="max-h-[70vh] ">
-          {movies.map((movie) => (
-            <div
-              key={movie.id}
-              className="flex flex-col items-center justify-center  "
-            >
-              <Button
-                variant="light"
-                className=" text-2xl "
-                onPress={() => {
-                  router.push("/" + movie.id);
-                }}
+        {movieList.length === 0 ? (
+          <div className="flex flex-col h-[60vh]  justify-center items-center ">
+            <CircularProgress size="lg" color="default" />
+          </div>
+        ) : (
+          <div
+            className="max-h-[70vh] overflow-scroll "
+            onScroll={handleScroll}
+          >
+            {movieList.map((movie) => (
+              <div
+                key={movie.id}
+                className="flex flex-col items-center justify-center  "
               >
-                <h2
-                  className={
-                    movie.seen
-                      ? `${bebas.className} text-ellipsis whitespace-nowrap line-through text-neutral-600 `
-                      : `${bebas.className} text-ellipsis whitespace-nowrap`
-                  }
+                <Button
+                  variant="light"
+                  className=" text-2xl "
+                  onPress={() => {
+                    router.push("/" + movie.id);
+                  }}
                 >
-                  {movie.title}
-                </h2>
-              </Button>
+                  <h2
+                    className={
+                      movie.seen
+                        ? `${bebas.className} text-ellipsis whitespace-nowrap line-through text-neutral-600 `
+                        : `${bebas.className} text-ellipsis whitespace-nowrap`
+                    }
+                  >
+                    {movie.title}
+                  </h2>
+                </Button>
 
-              <Divider className="my-2 w-2/3 " />
-            </div>
-          ))}
-        </ScrollShadow>
+                <Divider className="my-2 w-2/3 " />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       <div className="flex bottom-0 z-20 justify-center absolute pb-10  w-screen">
         <ButtonGroup>
