@@ -30,9 +30,9 @@ export default function Home() {
   const router = useRouter();
   const listRef = useRef<HTMLDivElement>(null);
   const [movieList, setMovieList] = useState<Movie[]>([] as Movie[]);
-  const fetchMovieData = async () => {
+  const fetchMovieData = async (startId: number, endId: number) => {
     try {
-      const res = await fetch("/api/movies");
+      const res = await fetch(`/api/movies?startId=${startId}&endId=${endId}`);
       const data = await res.json();
 
       setMovieList(data);
@@ -42,9 +42,9 @@ export default function Home() {
   };
 
   useEffect(() => {
-    fetchMovieData();
+    fetchMovieData(10, 20);
     const savedScrollPosition = localStorage.getItem("scrollPosition");
-    console.log(savedScrollPosition);
+    //console.log(savedScrollPosition);
     if (savedScrollPosition && listRef.current) {
       listRef.current.scrollTop = parseInt(savedScrollPosition, 10);
     }

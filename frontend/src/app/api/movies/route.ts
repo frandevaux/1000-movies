@@ -1,11 +1,15 @@
 export async function GET(
-  _request: Request,
-  { params }: { params: { id: string } }
+  request: Request,
+  { params }: { params: { startId: string; endId: string } }
 ) {
+  
   let movieData;
-
+  const { searchParams } = new URL(request.url)
+  const startId = searchParams.get('startId')
+  const endId = searchParams.get('endId')
+  
   try {
-    const response = await fetch("http://localhost:9000/api/movies/", {
+    const response = await fetch(`http://localhost:9000/api/movies?startId=${startId}&endId=${endId}`, {
       cache: "no-store",
     });
     if (!response.ok) {
@@ -13,7 +17,7 @@ export async function GET(
     }
     movieData = await response.json();
   } catch (error) {
-    console.error("Error fetching data:", error);
+    //console.error("Error fetching data:", error);
     return new Response("Error fetching data", { status: 500 });
   }
 
