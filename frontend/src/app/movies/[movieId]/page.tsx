@@ -8,16 +8,18 @@ import {
 } from "@nextui-org/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { fetchMovieData } from "../tmdbApi";
-import { Movie } from "../interfaces/movieDataInterfaces";
-import { bebas, pt_sans } from "../fonts";
+import { fetchMovieData } from "../../tmdbApi";
+import { Movie } from "../../interfaces/movieDataInterfaces";
+import { bebas, pt_sans } from "../../fonts";
 import router from "next/router";
 import { BiSolidMoviePlay } from "react-icons/bi";
 import { FaCheck } from "react-icons/fa";
 import { TiArrowShuffle } from "react-icons/ti";
-import { getRandomMovieId } from "../shuffle";
+import { getRandomMovieId } from "../../shuffle";
 import { useRouter } from "next/navigation";
-import { updateMovieData } from "../utils/movieDataUtils";
+import { updateMovieData } from "../../utils/movieDataUtils";
+import { IoMdPerson } from "react-icons/io";
+import { OptionButtonGroup } from "../../components/optionButtonGroup";
 
 const MoviePage = ({ params }: { params: { movieId: string } }) => {
   const router = useRouter();
@@ -32,11 +34,17 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
       await fetch("/api/movie/" + movieId)
         .then((res) => res.json())
         .then((data) => {
-          setMovieData(data[0]);
-          const releaseYear = new Date(data[0].release_date).getFullYear();
-          setReleaseYear(releaseYear);
-          setSeen(data[0].seen);
-          setIsLoading(false);
+          if (data.length > 0) {
+            console.log(data);
+            setMovieData(data[0]);
+            const releaseYear = new Date(data[0].release_date).getFullYear();
+            setReleaseYear(releaseYear);
+            setSeen(data[0].seen);
+            setIsLoading(false);
+          } else {
+            // Manejar el caso en que data está vacío o no es como se esperaba
+            console.log("No hay datos disponibles");
+          }
         });
     };
     fetchMovieData();
@@ -100,7 +108,9 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                       radius="full"
                       className="w-[45%] bg-neutral-900   bg-opacity-25"
                       as={Link}
+                      target="_blank"
                       href={"https://letterboxd.com/tmdb/" + movieData.id}
+                      rel="noopener noreferrer"
                     >
                       Letterboxd
                     </Button>
@@ -131,7 +141,7 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                           key={movieData.director.id}
                           className="flex flex-col gap-2"
                         >
-                          <div className=" w-[22vw] ">
+                          <div className=" w-[6rem]   ">
                             <Image
                               src={
                                 "https://image.tmdb.org/t/p/w500/" +
@@ -151,21 +161,27 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                             </p>
                           </div>
                         </div>
-                        <div className=" flex flex-row gap-4 pr-3">
+                        <div className=" flex flex-row gap-4 pr-3 justify-center ">
                           {movieData.cast.map((actor) => (
                             <div
                               key={actor.id}
                               className="flex flex-col gap-2 "
                             >
-                              <div className=" w-[22vw] ">
-                                <Image
-                                  src={
-                                    "https://image.tmdb.org/t/p/w500/" +
-                                    actor.profile_path
-                                  }
-                                  alt={actor.name}
-                                  className="rounded-md border-white border-2"
-                                />
+                              <div className=" w-[6rem]  ">
+                                {actor.profile_path ? (
+                                  <Image
+                                    src={
+                                      "https://image.tmdb.org/t/p/w500/" +
+                                      actor.profile_path
+                                    }
+                                    alt={actor.name}
+                                    className="rounded-md border-white border-2"
+                                  />
+                                ) : (
+                                  <div className="w-[7rem] h-[10.25rem] bg-neutral-900 bg-opacity-70 rounded-md border-white border-2 flex">
+                                    <IoMdPerson size={50} className="m-auto" />
+                                  </div>
+                                )}
                               </div>
 
                               <div>
@@ -185,35 +201,6 @@ const MoviePage = ({ params }: { params: { movieId: string } }) => {
                 </div>
               </ScrollShadow>
             </div>
-          </div>
-          <div className="flex  p-10 absolute bottom-0 z-20">
-            <ButtonGroup>
-              <Button
-                className={`${bebas.className} text-3xl w-[20vw] h-[6vh] bg-transparent `}
-                isIconOnly
-                onPress={() => {
-                  let randomMovieId = getRandomMovieId();
-                  router.push("/" + randomMovieId);
-                }}
-              >
-                <TiArrowShuffle />
-              </Button>
-              <Button
-                className={`${bebas.className} text-3xl w-[20vw] h-[6vh] bg-transparent  `}
-                isIconOnly
-                onPress={() => {
-                  router.push("/", { scroll: false });
-                }}
-              >
-                <BiSolidMoviePlay />
-              </Button>
-              <Button
-                className={`${bebas.className} text-xl w-[20vw] h-[6vh] bg-transparent `}
-                isIconOnly
-              >
-                <FaCheck />
-              </Button>
-            </ButtonGroup>
           </div>
         </div>
       )}
