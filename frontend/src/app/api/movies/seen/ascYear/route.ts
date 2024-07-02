@@ -1,5 +1,3 @@
-import { start } from "repl";
-
 export async function GET(
   request: Request,
   { params }: { params: { startId: string; endId: string } }
@@ -11,17 +9,15 @@ export async function GET(
 
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/movies?startId=${startId}&endId=${endId}`
+      `http://localhost:9000/api/movies/seen/ascYear?startId=${startId}&endId=${endId}`,
+      {
+        cache: "no-store",
+      }
     );
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    movieData = await response.json().then((data) => {
-      console.log(startId);
-      console.log(endId);
-      console.log(data.length);
-      return data;
-    });
+    movieData = await response.json();
   } catch (error) {
     //console.error("Error fetching data:", error);
     return new Response("Error fetching data", { status: 500 });

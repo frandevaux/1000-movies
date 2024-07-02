@@ -6,10 +6,7 @@ export async function GET(
 
   try {
     const response = await fetch(
-      "http://localhost:9000/api/movie/" + params.id,
-      {
-        cache: "no-store",
-      }
+      `${process.env.BACKEND_URL}/api/movie/${params.id}`
     );
     if (!response.ok) {
       throw new Error("Network response was not ok");
@@ -44,7 +41,7 @@ export async function PUT(
     // Leer el cuerpo de la solicitud
     const body = await request.json();
     // Realizar la solicitud PUT al backend
-    const response = await fetch(`http://localhost:9000/api/movie/${id}`, {
+    const response = await fetch(`${process.env.BACKEND_URL}/api/movie/${id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

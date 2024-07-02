@@ -9,10 +9,7 @@ export async function GET(
 
   try {
     const response = await fetch(
-      `http://localhost:9000/api/movies/seen?startId=${startId}&endId=${endId}`,
-      {
-        cache: "no-store",
-      }
+      `${process.env.BACKEND_URL}/api/movies/seen?startId=${startId}&endId=${endId}`
     );
     if (!response.ok) {
       throw new Error("Network response was not ok");

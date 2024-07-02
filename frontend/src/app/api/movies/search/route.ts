@@ -1,27 +1,24 @@
 import { start } from "repl";
 
-export async function GET(
-  request: Request,
-  { params }: { params: { startId: string; endId: string } }
-) {
+export async function GET(request: Request) {
   let movieData;
   const { searchParams } = new URL(request.url);
   const startId = searchParams.get("startId");
   const endId = searchParams.get("endId");
-
+  const name = searchParams.get("name");
   try {
     const response = await fetch(
-      `${process.env.BACKEND_URL}/api/movies?startId=${startId}&endId=${endId}`
+      `${process.env.BACKEND_URL}/api/movies/search?name=${name}&startId=${startId}&endId=${endId}`,
+      {
+        cache: "no-store",
+      }
     );
     if (!response.ok) {
       throw new Error("Network response was not ok");
     }
-    movieData = await response.json().then((data) => {
-      console.log(startId);
-      console.log(endId);
-      console.log(data.length);
-      return data;
-    });
+
+    movieData = await response.json();
+    console.log(startId, endId, name);
   } catch (error) {
     //console.error("Error fetching data:", error);
     return new Response("Error fetching data", { status: 500 });

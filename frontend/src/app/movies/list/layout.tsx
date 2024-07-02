@@ -9,10 +9,5 @@ export default function Layout({
   children: React.ReactNode;
 }>) {
   const router = useRouter();
-  return (
-    <>
-      <Cartelera />
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }
